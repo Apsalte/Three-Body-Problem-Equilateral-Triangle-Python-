@@ -3,9 +3,7 @@ from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-# ------------------------------
-# Constants
-# ------------------------------
+
 G = 1.0  # normalized units
 m = 1.0  # equal masses
 
@@ -18,9 +16,6 @@ L = R * np.sqrt(3)
 # Angular velocity for circular orbit
 omega = np.sqrt(G * m * 3 / L**3)  # stable rotation
 
-# ------------------------------
-# Initial positions (equilateral triangle around origin)
-# ------------------------------
 x1, y1 = R, 0
 x2, y2 = -R/2, R * np.sqrt(3)/2
 x3, y3 = -R/2, -R * np.sqrt(3)/2
@@ -35,15 +30,9 @@ vx3, vy3 = omega * R * np.sqrt(3)/2, -omega * R / 2
 initial_state = [x1, y1, x2, y2, x3, y3,
                  vx1, vy1, vx2, vy2, vx3, vy3]
 
-# ------------------------------
-# Time span
-# ------------------------------
 t_span = (0, 20)
 t_eval = np.linspace(t_span[0], t_span[1], 2000)
 
-# ------------------------------
-# Derivatives (gravity)
-# ------------------------------
 def derivatives(t, state):
     x1, y1, x2, y2, x3, y3, vx1, vy1, vx2, vy2, vx3, vy3 = state
 
@@ -66,18 +55,12 @@ def derivatives(t, state):
     return [vx1, vy1, vx2, vy2, vx3, vy3,
             a1[0], a1[1], a2[0], a2[1], a3[0], a3[1]]
 
-# ------------------------------
-# Solve ODE
-# ------------------------------
 sol = solve_ivp(derivatives, t_span, initial_state, t_eval=t_eval, rtol=1e-9, atol=1e-9)
 
 x1_sol, y1_sol = sol.y[0], sol.y[1]
 x2_sol, y2_sol = sol.y[2], sol.y[3]
 x3_sol, y3_sol = sol.y[4], sol.y[5]
 
-# ------------------------------
-# Set up figure
-# ------------------------------
 fig, ax = plt.subplots(figsize=(6,6))
 ax.set_xlim(-2, 2)
 ax.set_ylim(-2, 2)
@@ -86,38 +69,26 @@ ax.set_ylabel("y")
 ax.set_title("Equilateral Triangle Stable Orbit")
 ax.grid(True)
 
-# ------------------------------
-# Plot trails first (lower zorder)
-# ------------------------------
 trail1, = ax.plot([], [], '-', color='red', lw=1, zorder=1)
 trail2, = ax.plot([], [], '-', color='blue', lw=1, zorder=2)
 trail3, = ax.plot([], [], '-', color='green', lw=1, zorder=3)
 
-# ------------------------------
-# Plot bodies on top (higher zorder)
-# ------------------------------
 body1, = ax.plot([], [], 'o', color='red', markersize=8, zorder=4)
 body2, = ax.plot([], [], 'o', color='blue', markersize=8, zorder=5)
 body3, = ax.plot([], [], 'o', color='green', markersize=8, zorder=6)
 
-# ------------------------------
-# Animation function
-# ------------------------------
+
 def animate(i):
-    # Update trails in order: red -> blue -> green
     trail1.set_data(x1_sol[:i], y1_sol[:i])
     trail2.set_data(x2_sol[:i], y2_sol[:i])
     trail3.set_data(x3_sol[:i], y3_sol[:i])
 
-    # Update bodies on top
     body1.set_data([x1_sol[i]], [y1_sol[i]])
     body2.set_data([x2_sol[i]], [y2_sol[i]])
     body3.set_data([x3_sol[i]], [y3_sol[i]])
 
     return trail1, trail2, trail3, body1, body2, body3
 
-# ------------------------------
-# Run animation
-# ------------------------------
 ani = FuncAnimation(fig, animate, frames=len(t_eval), interval=20, blit=True)
 plt.show()
+
